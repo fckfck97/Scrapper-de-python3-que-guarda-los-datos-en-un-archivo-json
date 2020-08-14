@@ -4,6 +4,8 @@
 from requests import get
 from bs4 import BeautifulSoup
 import json
+from tqdm import tqdm,trange
+import time
 
 def menu():
 	"""
@@ -19,30 +21,52 @@ def menu():
  
  
 
-def busqueda(nombre):
+def busqueda(nombre,numero):
 	data = {}
-	data['titulos'] = []
-	data['refs'] = []
-	data['idiomas'] = []
+	data[nombre] = []
 	url = 'https://hackstore.net/'+nombre+'/'
-	if url == 'https://hackstore.net/'+nombre+'/':
-		response = get(url)
-		res = BeautifulSoup(response.text,"html5lib");
-		tags = res.findAll("div",{"class":"movie-back"})
-		for tag in tags:
-			titulo = tag.h3.getText()
-			data['titulos'].append(titulo)
-		tags2 = res.findAll("div", {"class": "movie-back"})
-		for tag in tags2:
-			ref = tag.a.get("href")
-			data['refs'].append(ref)
-		tags3 = res.findAll("div",{"class":"audios"})
-		for tag in tags3:
-			idioma = tag.getText()
-			data['idiomas'].append(idioma)
-		
-		with open('data.json', 'w') as file:
-			json.dump(data, file, indent=4)
+	url2 = 'https://hackstore.net/'+nombre+'/page/'+numero+'/'
+	for num in trange(int(numero)):
+		if url == 'https://hackstore.net/'+nombre+'/':
+			response = get(url)
+			res = BeautifulSoup(response.text,"html5lib");
+			tags = res.findAll("div",{"class":"movie-back"})
+			for tag in tags:
+				titulo = tag.h3.getText()
+				data[nombre].append({'titulo': titulo})
+			tags2 = res.findAll("div", {"class": "movie-back"})
+			for tag in tags2:
+				ref = tag.a.get("href")
+				data[nombre].append({'ref': ref})
+			tags3 = res.findAll("div",{"class":"audios"})
+			for tag in tags3:
+				idioma = tag.getText()
+				data[nombre].append({'idioma': idioma})
+			with open('data.json', 'w') as file:
+				json.dump(data, file, indent=4)
+
+		elif url2 == 'https://hackstore.net/'+nombre+'/page/'+numero+'/':
+			response = get(url2)
+			res = BeautifulSoup(response.text,"html5lib");
+			tags = res.findAll("div",{"class":"movie-back"})
+			for tag in tags:
+				titulo = tag.h3.getText()
+				data[nombre].append({'titulo': titulo})
+			tags2 = res.findAll("div", {"class": "movie-back"})
+			for tag in tags2:
+				ref = tag.a.get("href")
+				data[nombre].append({'ref': ref})
+			tags3 = res.findAll("div",{"class":"audios"})
+			for tag in tags3:
+				idioma = tag.getText()
+				data[nombre].append({'idioma': idioma})
+			with open('data.json', 'w') as file:
+				json.dump(data, file, indent=4)
+
+			
+		time.sleep(0.001)
+	
+
 
 
 while True:
@@ -54,16 +78,16 @@ while True:
  
 	if opcionMenu=="1":
 		print ("")
-		input("Has pulsado la opción 1...\npulsa una tecla para continuar")
-		busqueda("peliculas")
+		numero = input("Ingresa el Numero de Paginas a Iterar >> ")
+		busqueda("peliculas",numero)
 	elif opcionMenu=="2":
 		print ("")
-		input("Has pulsado la opción 2...\npulsa una tecla para continuar")
-		busqueda("series")
+		numero = input("Ingresa el Numero de Paginas a Iterar >> ")
+		busqueda("series",numero)
 	elif opcionMenu=="3":
 		print ("")
-		input("Has pulsado la opción 3...\npulsa una tecla para continuar")
-		busqueda("animes")
+		numero = input("Ingresa el Numero de Paginas a Iterar >> ")
+		busqueda("animes",numero)
 	elif opcionMenu=="4":
 		print ("")
 		nombre = str(input("Ingresa el nombre a buscar: "))
@@ -73,6 +97,7 @@ while True:
 	else:
 		print ("")
 		input("No has pulsado ninguna opción correcta...\npulsa una tecla para continuar")
+
 
 
 
